@@ -1,6 +1,7 @@
 package com.yjotdev.accidentreporter.data.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import dagger.Module
 import dagger.Binds
@@ -10,6 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.Provides
 import javax.inject.Singleton
 import retrofit2.Retrofit
+import okhttp3.logging.HttpLoggingInterceptor
 import com.yjotdev.accidentreporter.data.remote.api.GeocodingApi
 import com.yjotdev.accidentreporter.data.remote.api.ReportApi
 import com.yjotdev.accidentreporter.data.remote.network.RetrofitBuilder
@@ -25,6 +27,7 @@ import com.yjotdev.accidentreporter.domain.repository.ReportApiRepository
 import com.yjotdev.accidentreporter.domain.repository.ReportDaoRepository
 import com.yjotdev.accidentreporter.domain.repository.StringRepository
 import com.yjotdev.accidentreporter.domain.repository.TokenRepository
+import com.yjotdev.accidentreporter.BuildConfig
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -68,6 +71,20 @@ abstract class DiModules {
         @Singleton
         fun provideRetrofit(retrofitBuilder: RetrofitBuilder): Retrofit {
             return retrofitBuilder.getRetrofitInstance()
+        }
+
+        @Provides
+        @Singleton
+        fun provideLoggingInterceptor(): HttpLoggingInterceptor {
+            return HttpLoggingInterceptor { msm ->
+                Log.d("Https", msm)
+            }.apply {
+                level = if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BODY
+                } else {
+                    HttpLoggingInterceptor.Level.NONE
+                }
+            }
         }
 
         @Provides
